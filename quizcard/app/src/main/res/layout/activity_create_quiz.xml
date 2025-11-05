@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp"
+    android:layout_marginTop="16dp">
+
+
+    <!-- Top buttons: Select existing quiz / Add question / Save quiz -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+
+    <Button
+            android:id="@+id/selectQuizButton"
+            android:layout_width="0dp"
+            android:layout_height="65dp"
+            android:layout_weight="1"
+            android:text="Select Quiz" />
+
+
+        <Button
+            android:id="@+id/saveQuizButton"
+            android:layout_width="0dp"
+            android:layout_height="67dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="Save Quiz" />
+    </LinearLayout>
+
+    <!-- RecyclerView for all questions -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingTop="8dp"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+        <Button
+            android:id="@+id/addQuestionButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Add Question" />
+    </LinearLayout>
+</LinearLayout>
