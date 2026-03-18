@@ -1,24 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/main2"
     android:gravity="center|top"
     android:orientation="vertical"
     android:outlineProvider="none"
     android:padding="24dp">
 
-
     <LinearLayout
+        android:id="@+id/linearLayout3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
 
         <Button
             android:id="@+id/button"
             android:layout_width="15dp"
             android:layout_height="wrap_content"
+            android:layout_marginRight="4dp"
             android:layout_weight="1"
+            android:background="@drawable/button_background"
             android:onClick="onQuestionNavigatorClicked"
             android:text="Question" />
 
@@ -26,7 +38,9 @@
             android:id="@+id/button_select"
             android:layout_width="10dp"
             android:layout_height="wrap_content"
+            android:layout_marginRight="4dp"
             android:layout_weight="1"
+            android:background="@drawable/button_background"
             android:onClick="onSelectQuizFileClicked"
             android:text="File" />
 
@@ -35,66 +49,160 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/button_background"
             android:onClick="onCreateQuizClicked"
             android:text="Create" />
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="1/100" />
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/mainroundscreen"
+        android:gravity="center|top"
+        android:orientation="vertical"
+        android:outlineProvider="none"
+        android:padding="24dp"
+        app:layout_constraintBottom_toBottomOf="@+id/linearLayout6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout3">
 
-    <TextView
-        android:id="@+id/questionText"
-        android:layout_width="wrap_content"
-        android:layout_height="289dp"
-        android:layout_marginBottom="24dp"
-        android:text="Question"
-        android:textColor="#FFFFFF"
-        android:textSize="22sp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="25"
+            android:orientation="vertical">
 
-    <Button
-        android:id="@+id/choiceA"
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autoText="false"
+                android:text="1/100"
+                android:textAlignment="center"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/questionText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="24dp"
+                android:clickable="false"
+                android:onClick="onReadClicked"
+                android:text="Question"
+                android:textAlignment="center"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp" />
+
+        </LinearLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="342dp">
+
+            <Button
+                android:id="@+id/choiceA"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_background"
+                android:maxHeight="82dp"
+                android:onClick="onChoiceClicked"
+                android:padding="16dp"
+                android:text="A"
+                app:layout_constraintBottom_toTopOf="@id/choiceB"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.25"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/choiceB"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_background"
+                android:maxHeight="82dp"
+                android:onClick="onChoiceClicked"
+                android:padding="16dp"
+                android:text="B"
+                app:layout_constraintBottom_toTopOf="@id/choiceC"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/choiceA" />
+
+            <Button
+                android:id="@+id/choiceC"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_background"
+                android:maxHeight="82dp"
+                android:onClick="onChoiceClicked"
+                android:padding="16dp"
+                android:text="C"
+                app:layout_constraintBottom_toTopOf="@id/choiceD"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/choiceB" />
+
+            <Button
+                android:id="@+id/choiceD"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+
+                android:background="@drawable/button_background"
+                android:maxHeight="82dp"
+                android:onClick="onChoiceClicked"
+                android:padding="16dp"
+                android:text="D"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/choiceC" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+
+        android:id="@+id/linearLayout6"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="onChoiceClicked"
-        android:text="A" />
+        android:layout_height="48dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
 
-    <Button
-        android:id="@+id/choiceB"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="onChoiceClicked"
-        android:text="B" />
 
-    <Button
-        android:id="@+id/choiceC"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="onChoiceClicked"
-        android:text="C" />
+        <Button
+            android:id="@+id/switchbtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_marginRight="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_background"
+            android:onClick="onSwitchBtnClicked"
+            android:text="Switch" />
 
-    <Button
-        android:id="@+id/choiceD"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="onChoiceClicked"
-        android:text="D" />
-
-    <View
-        android:layout_width="294dp"
-        android:layout_height="25dp"
-        android:layout_weight="0.5" />
-
-    <Button
-        android:id="@+id/read"
-        android:layout_width="220dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center"
-        android:onClick="onReadClicked"
-        android:text="Read" />
-
-</LinearLayout>
+        <Button
+            android:id="@+id/read"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_marginLeft="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_background"
+            android:onClick="onReadClicked"
+            android:text="Read" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 

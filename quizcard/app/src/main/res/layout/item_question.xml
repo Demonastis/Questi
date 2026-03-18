@@ -1,28 +1,33 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/default_dark"
+    android:orientation="horizontal"
     android:padding="8dp">
 
     <EditText
         android:id="@+id/questionText"
         android:layout_width="0dp"
-        android:layout_weight="2"
         android:layout_height="wrap_content"
-        android:hint="Question"/>
+        android:layout_weight="2"
+        android:hint="Question"
+        android:textColorHint="@color/white"
+        android:textColor="@color/white"
+        />
 
     <EditText
         android:id="@+id/answerText"
         android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:hint="Answer"/>
+        android:layout_weight="1"
+        android:hint="Answer" android:textColorHint="@color/white"
+        android:textColor="@color/white" />
 
     <ImageButton
         android:id="@+id/deleteButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_delete"
-        android:contentDescription="Delete"/>
+        android:contentDescription="Delete"
+        android:src="@android:drawable/ic_delete" />
 </LinearLayout>

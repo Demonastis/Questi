@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="8dp"
+    android:background="@color/default_dark"
     android:layout_marginTop="16dp">
 
 
@@ -20,7 +21,9 @@
             android:layout_width="0dp"
             android:layout_height="65dp"
             android:layout_weight="1"
-            android:text="Select Quiz" />
+            android:text="Select Quiz"
+            android:background="@drawable/button_background"
+        />
 
 
         <Button
@@ -29,7 +32,9 @@
             android:layout_height="67dp"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:text="Save Quiz" />
+            android:text="Save Quiz"
+            android:background="@drawable/button_background"
+            />
     </LinearLayout>
 
     <!-- RecyclerView for all questions -->
@@ -38,7 +43,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingTop="8dp"/>
+        android:paddingTop="8dp"
+
+
+        />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -50,6 +58,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="Add Question" />
+            android:text="Add Question"
+            android:background="@drawable/button_background"/>
     </LinearLayout>
 </LinearLayout>

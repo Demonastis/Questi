@@ -15,12 +15,15 @@ import android.os.Build
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.speech.tts.TextToSpeech
 import androidx.annotation.RequiresApi
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
 import java.util.Locale
+
 
 @RequiresApi(Build.VERSION_CODES.DONUT)
 class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
@@ -32,12 +35,16 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private var right: Int = 0
     private var wrong: Int = 0
     private val PICK_JSON_FILE = 1001
+
+    private lateinit var sizeOfQ: TextView;
     private var allPossibleAnswers = listOf(
         "Paris", "London", "Berlin", "Madrid",
         "Mars", "Earth", "Venus", "Jupiter",
         "Atlantic", "Pacific", "Indian", "Arctic",
         "3", "4", "5", "Blue Whale", "Portuguese", "7", "Oxygen", "Egypt"
     )
+    private var isSwitchedMode = false
+
     private lateinit var tts: TextToSpeech
 
     // --------------------------
@@ -55,6 +62,9 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private var questionBank: List<Question> = defaultQuestionBank()
     private var shuffledQuestions: List<Question> = listOf()
 
+
+    private var correctCount = 0
+    private var wrongCount = 0
     // --------------------------
     // Data Classes
     // --------------------------
@@ -63,10 +73,30 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         val correctAnswer: String
     )
 
+    // Holds the quiz exactly as loaded (default or JSON)
+    private var originalQuestionBank: List<Question> = listOf()
+
+    // Flag for switch mode
+
+
+    private fun buildQuestionBank(): List<Question> {
+        return if (isSwitchedMode) {
+            originalQuestionBank.map {
+                Question(
+                    text = it.correctAnswer,
+                    correctAnswer = it.text
+                )
+            }
+        } else {
+            originalQuestionBank
+        }
+    }
+
     // --------------------------
     // Lifecycle
     // --------------------------
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         tts = TextToSpeech(this, this)
@@ -78,19 +108,28 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             findViewById(R.id.choiceC),
             findViewById(R.id.choiceD)
         )
+        number = findViewById(R.id.textView)
+
+        sizeOfQ = findViewById(R.id.questionText)
+
 
         // 2️⃣ Load quiz files
         val quizFiles = getQuizFiles()
         if (quizFiles.isEmpty()) {
             Toast.makeText(this, "No quizzes found! Using default quiz.", Toast.LENGTH_LONG).show()
+
+            originalQuestionBank = defaultQuestionBank()
+            questionBank = buildQuestionBank()
+
             updatePossibleAnswersFromQuestions(questionBank)
             shuffledQuestions = questionBank.shuffled()
             showNextQuestion()
-        } else {
 
+        } else {
             showQuizSelectionDialog(quizFiles)
         }
-        number = findViewById(R.id.textView)
+
+        number.text = "$currentQuestionIndex/${questionBank.size}"
         soundPool = SoundPool.Builder()
             .setMaxStreams(5)
             .build()
@@ -99,6 +138,50 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         right = soundPool.load(this, R.raw.rightanswer, 1)
         wrong = soundPool.load(this, R.raw.wrong, 2)
     }
+
+    private fun createDefaultQuizFile(): Quiz {
+        val questions = listOf(
+            Question("What is the capital of France?", "Paris"),
+            Question("Which planet is known as the Red Planet?", "Mars"),
+            Question("2 + 2 equals?", "4"),
+            Question("Which ocean is the largest?", "Pacific"),
+            Question("What is the largest mammal?", "Blue Whale"),
+            Question("Which language is primarily spoken in Brazil?", "Portuguese"),
+            Question("How many continents are there?", "7"),
+            Question("Which element has the chemical symbol O?", "Oxygen"),
+            Question("What is the square root of 16?", "4"),
+            Question("Which country is famous for the pyramids?", "Egypt")
+        )
+
+        return Quiz(
+            title = "Default Quiz",
+            questions = questions
+        )
+    }
+
+    // Method to save the quiz file
+    private fun saveQuizFile(quiz: Quiz): File {
+        // Define the directory and file name
+        val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        if (!documentsDir.exists()) documentsDir.mkdirs() // Ensure the folder exists
+
+        val quizFile = File(documentsDir, "QuizCard/default_quiz.json")
+
+        // Convert the quiz to JSON and save it to the file
+        val json = Gson().toJson(quiz)
+        quizFile.writeText(json)
+
+        return quizFile // Return the file object for future reference
+    }
+
+    // Data class to represent a quiz (if needed for serialization)
+    data class Quiz(
+        val title: String,
+        val questions: List<Question>
+    )
+
+    // Your Question data class remains unchange
+
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
             val result = tts.setLanguage(Locale.US)
@@ -123,6 +206,16 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
     }
 
+    private fun getSwitchedQuestions(original: List<Question>): List<Question> {
+        return original.map {
+            Question(
+                text = it.correctAnswer,
+                correctAnswer = it.text
+            )
+        }
+    }
+
+
     // --------------------------
     // Quiz File Handling
     // --------------------------
@@ -130,8 +223,26 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         val appDir = File(getExternalFilesDir(null), "quizzes")
         val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
         val quizDir = File(documentsDir, "QuizCard")
-
         val allFiles = mutableListOf<File>()
+        if (!quizDir.exists()) {
+            val created = quizDir.mkdirs()
+            val defaultQuiz = createDefaultQuizFile()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (Environment.isExternalStorageManager()) {
+                    // Permission already granted, proceed with saving the file
+                    saveQuizFile(defaultQuiz)
+                } else {
+                    val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                    startActivityForResult(intent, 1001) // Request the user to grant permission
+                }
+            } else {
+                // For lower versions, use the standard approach
+                saveQuizFile(defaultQuiz)
+            }
+
+        }
+        else
+
         if (appDir.exists()) allFiles += appDir.listFiles { it.extension == "json" } ?: emptyArray()
         if (quizDir.exists()) allFiles += quizDir.listFiles { it.extension == "json" } ?: emptyArray()
 
@@ -157,17 +268,24 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private fun showQuizSelectionDialog(quizFiles: List<File>) {
         val fileNames = quizFiles.map { it.nameWithoutExtension }.toTypedArray()
+
         AlertDialog.Builder(this)
             .setTitle("Select a Quiz")
             .setItems(fileNames) { _, which ->
                 val selectedFile = quizFiles[which]
-                questionBank = loadQuestionsFromFile(selectedFile)
+
+                originalQuestionBank = loadQuestionsFromFile(selectedFile)
+                questionBank = buildQuestionBank()
+
                 updatePossibleAnswersFromQuestions(questionBank)
                 shuffledQuestions = questionBank.shuffled()
+                currentQuestionIndex = 0
+
                 showNextQuestion()
             }
             .show()
     }
+
 
     // --------------------------
     // File Picker
@@ -189,15 +307,14 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 contentResolver.openInputStream(uri)?.use { inputStream ->
                     val json = inputStream.bufferedReader().readText()
                     val type = object : TypeToken<List<Question>>() {}.type
-                    questionBank = Gson().fromJson(json, type)
+                    originalQuestionBank = Gson().fromJson(json, type)
+                    questionBank = buildQuestionBank()
 
-                    // 🔁 Refresh possible answers for this quiz
                     updatePossibleAnswersFromQuestions(questionBank)
-
-                    // 🔁 Reset quiz state
                     shuffledQuestions = questionBank.shuffled()
                     currentQuestionIndex = 0
                     showNextQuestion()
+
                 }
             }
         }
@@ -223,6 +340,25 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     }
 
 
+    fun onSwitchBtnClicked(view: View) {
+        isSwitchedMode = !isSwitchedMode
+
+        questionBank = buildQuestionBank()
+        updatePossibleAnswersFromQuestions(questionBank)
+
+        shuffledQuestions = questionBank.shuffled()
+        currentQuestionIndex = 0
+
+        showNextQuestion()
+
+        Toast.makeText(
+            this,
+            if (isSwitchedMode) "🔄 Switched Mode ON" else "🔁 Normal Mode",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+
 
 
 
@@ -245,15 +381,32 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         if (shuffledQuestions.isEmpty()) return
 
         if (currentQuestionIndex >= shuffledQuestions.size) {
-            Toast.makeText(this, "Quiz complete!", Toast.LENGTH_LONG).show()
-            currentQuestionIndex = 0
-            shuffledQuestions = questionBank.shuffled()
+
+            AlertDialog.Builder(this)
+                .setTitle("Quiz Complete 🎉")
+                .setMessage(
+                    "Results:\n\n" +
+                            "✅ Correct: $correctCount\n" +
+                            "❌ Wrong: $wrongCount\n" +
+                            "📊 Total: ${shuffledQuestions.size}"
+                )
+                .setPositiveButton("Restart") { _, _ ->
+                    correctCount = 0
+                    wrongCount = 0
+                    currentQuestionIndex = 0
+                    shuffledQuestions = questionBank.shuffled()
+                    showNextQuestion()
+                }
+                .setCancelable(false)
+                .show()
+
+            return
         }
 
         val q = shuffledQuestions[currentQuestionIndex]
         questionText.text = q.text
-//        val n = "${currentQuestionIndex+1}/${shuffledQuestions.size}"
-//        number.text = n;
+        val n = "${currentQuestionIndex+1}/${shuffledQuestions.size}"
+        number.text = n;
         val choices = getChoicesForQuestion(q)
         for (i in buttons.indices) {
             buttons[i].text = choices[i]
@@ -269,6 +422,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
 
         if (isCorrect) {
+            correctCount++
 //            Toast.makeText(this, "✅ Correct!", Toast.LENGTH_SHORT).show()
             tone.startTone(ToneGenerator.TONE_PROP_ACK, 200)
             playSound(right)
@@ -277,6 +431,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         } else {
 //            val toast = Toast.makeText(this,"❌ Wrong! Correct answer: ${currentQuestion.correctAnswer}",Toast.LENGTH_SHORT)
 //            toast.show()
+            wrongCount++
             tone.startTone(ToneGenerator.TONE_PROP_NACK, 200)
             playSound(wrong)
 //            Handler(Looper.getMainLooper()).postDelayed({ toast.cancel() }, 1000)
